@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Demo - Path Planning and Navigation</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="layout">
+    <nav class="sidebar">
+      <div class="sidebar__logo">Robotics Education</div>
+      <div class="sidebar__nav">
+        <a href="index.html" class="sidebar__link">Home</a>
+        <a href="video1.html" class="sidebar__link">Junior Audience</a>
+        <a href="video2.html" class="sidebar__link">High School</a>
+        <a href="video3.html" class="sidebar__link">Undergraduate</a>
+        <a href="interactive.html" class="sidebar__link sidebar__link--active">Interactive Demo</a>
+        <a href="reflection.html" class="sidebar__link">Reflection</a>
+      </div>
+    </nav>
+
+    <main class="main-content">
+      <div class="container">
+        <section class="hero">
+          <h1 class="hero__title">Interactive Path Planning Simulation</h1>
+          <p class="hero__subtitle">Experiment with the A* algorithm by creating obstacles and watching the robot find optimal paths in real-time.</p>
+        </section>
+
+        <section class="section">
+          <h2 class="section__title">How to Use</h2>
+          <div class="grid">
+            <div class="card">
+              <h3 class="card__title">Set Start Point</h3>
+              <p class="card__text">Click the Set Start button, then click on the grid to place the green start position.</p>
+            </div>
+            <div class="card">
+              <h3 class="card__title">Set Goal Point</h3>
+              <p class="card__text">Click the Set Goal button, then click on the grid to place the red goal position.</p>
+            </div>
+            <div class="card">
+              <h3 class="card__title">Add Obstacles</h3>
+              <p class="card__text">Click the Toggle Obstacles button, then click grid cells to create or remove black obstacle walls.</p>
+            </div>
+            <div class="card">
+              <h3 class="card__title">Find Path</h3>
+              <p class="card__text">Click Find Path to watch the A* algorithm explore the space and calculate the shortest route.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="canvas-container">
+          <div class="canvas-group">
+            <div class="controls">
+              <select id="algorithm-select" class="btn btn--secondary">
+                <option value="astar">A* Algorithm</option>
+                <option value="dijkstra">Dijkstra Algorithm</option>
+                <option value="bfs">BFS Algorithm</option>
+                <option value="dfs">DFS Algorithm</option>
+              </select>
+              <button id="btn-find-path" class="btn btn--primary">Find Path</button>
+              <button id="btn-clear-path" class="btn btn--secondary">Clear Path</button>
+              <button id="btn-clear-grid" class="btn btn--secondary">Clear Grid</button>
+            </div>
+
+            <div class="canvas-wrapper">
+              <div class="side-controls">
+                <button id="btn-set-start" class="btn btn--secondary">Set Start</button>
+                <button id="btn-set-goal" class="btn btn--secondary">Set Goal</button>
+                <button id="btn-toggle-obstacles" class="btn btn--secondary">Toggle Obstacles</button>
+                <button id="btn-random-obstacles" class="btn btn--secondary">Random Obstacles</button>
+              </div>
+              <canvas id="grid-canvas" class="canvas" width="600" height="600"></canvas>
+            </div>
+
+            <div class="legend">
+              <div class="legend__item">
+                <div class="legend__color" style="background-color: #FFFFFF;"></div>
+                <span>Empty</span>
+              </div>
+              <div class="legend__item">
+                <div class="legend__color" style="background-color: #37352F;"></div>
+                <span>Obstacle</span>
+              </div>
+              <div class="legend__item">
+                <div class="legend__color" style="background-color: #0F7B6C;"></div>
+                <span>Start</span>
+              </div>
+              <div class="legend__item">
+                <div class="legend__color" style="background-color: #D44C47;"></div>
+                <span>Goal</span>
+              </div>
+              <div class="legend__item">
+                <div class="legend__color" style="background-color: #E8F3FF;"></div>
+                <span>Explored</span>
+              </div>
+              <div class="legend__item">
+                <div class="legend__color" style="background-color: #2383E2;"></div>
+                <span>Path</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="path-info" class="info-box" style="display: none;">
+            <p id="path-info-text" class="info-box__text"></p>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2 class="section__title">Understanding Path Planning Algorithms</h2>
+          
+          <p>This interactive demo allows you to compare different pathfinding algorithms. Each algorithm has unique characteristics in how it explores the search space and finds paths between start and goal positions.</p>
+
+          <p>A* uses a heuristic function to guide exploration toward the goal efficiently, balancing actual cost with estimated remaining distance. Dijkstra guarantees the shortest path by systematically exploring all directions without heuristic guidance. BFS explores level by level, finding the shortest path in unweighted graphs. DFS dives deep into one path before backtracking, which may not find the optimal path but uses less memory.</p>
+
+          <p>As algorithms run, light blue cells show explored nodes and dark blue shows the final path. Compare how many cells each algorithm explores to understand their efficiency differences.</p>
+        </section>
+
+        <section class="section">
+          <h2 class="section__title">Experiment Ideas</h2>
+          
+          <div class="grid">
+            <div class="card">
+              <h3 class="card__title">Straight Line</h3>
+              <p class="card__text">Place start and goal with no obstacles between them. Notice how few cells the algorithm explores when the path is direct.</p>
+            </div>
+            <div class="card">
+              <h3 class="card__title">Maze Navigation</h3>
+              <p class="card__text">Create complex mazes with narrow passages. Observe how A* finds the optimal route even through intricate obstacle patterns.</p>
+            </div>
+            <div class="card">
+              <h3 class="card__title">Obstacle Walls</h3>
+              <p class="card__text">Build walls forcing the algorithm to find alternate routes. Compare the number of explored cells with and without obstacles.</p>
+            </div>
+            <div class="card">
+              <h3 class="card__title">Multiple Paths</h3>
+              <p class="card__text">Create scenarios where several paths exist. A* will always find the shortest one, demonstrating its optimality guarantee.</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

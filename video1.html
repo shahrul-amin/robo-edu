@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Junior Audience - Path Planning and Navigation</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="layout">
+    <nav class="sidebar">
+      <div class="sidebar__logo">Robotics Education</div>
+      <div class="sidebar__nav">
+        <a href="index.html" class="sidebar__link">Home</a>
+        <a href="video1.html" class="sidebar__link sidebar__link--active">Junior Audience</a>
+        <a href="video2.html" class="sidebar__link">High School</a>
+        <a href="video3.html" class="sidebar__link">Undergraduate</a>
+        <a href="interactive.html" class="sidebar__link">Interactive Demo</a>
+        <a href="reflection.html" class="sidebar__link">Reflection</a>
+      </div>
+    </nav>
+
+    <main class="main-content">
+      <div class="container">
+        <section class="hero">
+          <span class="audience-label">Ages 8-12</span>
+          <h1 class="hero__title">How Do Robots Find Their Way?</h1>
+          <p class="hero__subtitle">Learn how robots are like super smart puzzle solvers that can find the best path to get where they need to go.</p>
+        </section>
+
+        <section class="video-container">
+          <video class="video-player" controls>
+            <source src="assets/video1.mp4" type="video/mp4">
+          </video>
+        </section>
+
+        <section class="section">
+          <h2 class="section__title">Understanding Robot Navigation</h2>
+          
+          <p>Imagine you are in a big playground and you want to get from the swings to the slide. You look around and see the quickest path, but there are other kids playing in the way. So you choose a different path that goes around them. Robots do something very similar when they need to move from one place to another.</p>
+
+          <p>When a robot needs to travel somewhere, it uses special computer programs to figure out the best route. Just like when you play a maze game and try to find the path from start to finish, robots look at where they are, where they need to go, and what things are blocking their way. They then calculate the fastest and safest path to reach their goal.</p>
+
+          <p>Think about your favorite video game character moving through a level. The character needs to avoid obstacles like walls, enemies, or pits while trying to reach the end of the level. Robots work the same way in real life. They have sensors that act like eyes to see obstacles around them, and their computer brain quickly figures out how to move around those obstacles to reach their destination safely.</p>
+
+          <div class="info-box">
+            <p class="info-box__text">Robots used in warehouses to deliver packages, vacuum cleaners that clean your house by themselves, and even toy robots all use path planning to move around without bumping into things.</p>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2 class="section__title">Real-Life Robot Examples</h2>
+          
+          <div class="grid">
+            <div class="card">
+              <h3 class="card__title">Robot Vacuum Cleaners</h3>
+              <p class="card__text">These round robots move around your house cleaning floors. They figure out where furniture is and plan paths to clean every spot without getting stuck.</p>
+            </div>
+            
+            <div class="card">
+              <h3 class="card__title">Delivery Robots</h3>
+              <p class="card__text">Small robots that deliver food or packages on sidewalks. They know how to avoid people, pets, and objects while finding the fastest way to make deliveries.</p>
+            </div>
+            
+            <div class="card">
+              <h3 class="card__title">Mars Rovers</h3>
+              <p class="card__text">Robots on Mars that explore the planet. Scientists tell them where to go, and the robots figure out how to get there safely while avoiding rocks and slopes.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2 class="section__title">Try It Yourself</h2>
+          <p>Want to see how robots plan paths? Visit our interactive demo where you can create obstacles and watch a robot figure out the best path around them.</p>
+          <a href="interactive.html" class="btn btn--primary">Go to Interactive Demo</a>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

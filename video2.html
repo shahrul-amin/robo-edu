@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>High School - Path Planning and Navigation</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="layout">
+    <nav class="sidebar">
+      <div class="sidebar__logo">Robotics Education</div>
+      <div class="sidebar__nav">
+        <a href="index.html" class="sidebar__link">Home</a>
+        <a href="video1.html" class="sidebar__link">Junior Audience</a>
+        <a href="video2.html" class="sidebar__link sidebar__link--active">High School</a>
+        <a href="video3.html" class="sidebar__link">Undergraduate</a>
+        <a href="interactive.html" class="sidebar__link">Interactive Demo</a>
+        <a href="reflection.html" class="sidebar__link">Reflection</a>
+      </div>
+    </nav>
+
+    <main class="main-content">
+      <div class="container">
+        <section class="hero">
+          <span class="audience-label">Ages 13-18</span>
+          <h1 class="hero__title">Path Planning Algorithms in Robotics</h1>
+          <p class="hero__subtitle">Explore the computational methods and graph theory concepts that enable autonomous navigation systems.</p>
+        </section>
+
+        <section class="video-container">
+          <video class="video-player" controls>
+            <source src="assets/video2.mp4" type="video/mp4">
+          </video>
+        </section>
+
+        <section class="section">
+          <h2 class="section__title">Introduction to Path Planning</h2>
+          
+          <p>Path planning is a fundamental problem in robotics that involves finding an optimal route from a starting position to a goal location while avoiding obstacles. This challenge appears in many real-world applications, from GPS navigation systems in your smartphone to autonomous vehicles navigating city streets. The key question path planning algorithms answer is: given a map of the environment, what sequence of movements should a robot make to reach its destination efficiently and safely?</p>
+
+          <p>To solve path planning problems, roboticists use concepts from graph theory, a branch of mathematics that studies networks of connected points. In this context, we represent the environment as a graph where each possible robot position is a node, and edges connect positions the robot can move between. Finding the optimal path then becomes a problem of finding the shortest path through this graph, taking into account both distance and obstacles.</p>
+
+          <p>Several algorithms exist to solve this problem, each with different strengths. Dijkstra's algorithm guarantees finding the shortest path but may explore many unnecessary nodes. The A* algorithm improves on this by using heuristics to guide the search toward the goal more efficiently. Heuristics are educated guesses about which direction is most promising, similar to how you might estimate that walking north will get you closer to a destination that you know is in that general direction.</p>
+
+          <div class="info-box">
+            <p class="info-box__text">The efficiency of path planning algorithms is measured using Big O notation, a concept you might encounter in computer science classes. A* typically performs better than naive approaches because it intelligently prioritizes which paths to explore first.</p>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2 class="section__title">Algorithm Efficiency and Trade-offs</h2>
+          
+          <p>When evaluating path planning algorithms, computer scientists consider several factors beyond just finding a valid path. The computational complexity determines how much processing time is required as the environment grows larger. Memory usage matters because robots have limited onboard computing resources. Path optimality measures whether the algorithm finds the absolute shortest path or just a reasonable one. And real-time performance is crucial for robots that must react quickly to changing environments.</p>
+
+          <p>Different applications require different algorithmic approaches. A warehouse robot moving among static shelving can use more computation time to find a perfect path. An autonomous car navigating traffic must make rapid decisions even if they are not perfectly optimal. A drone planning a flight path might prioritize smooth curves over sharp turns to conserve energy and maintain stability.</p>
+        </section>
+
+        <section class="section">
+          <h2 class="section__title">Real-World Applications</h2>
+          
+          <div class="grid">
+            <div class="card">
+              <h3 class="card__title">Autonomous Vehicles</h3>
+              <p class="card__text">Self-driving cars continuously update their path plans based on sensor data, adapting to traffic, pedestrians, and changing road conditions in real-time.</p>
+            </div>
+            
+            <div class="card">
+              <h3 class="card__title">Video Game AI</h3>
+              <p class="card__text">Non-player characters in games use path planning to navigate virtual environments, creating realistic movement patterns and behaviors.</p>
+            </div>
+            
+            <div class="card">
+              <h3 class="card__title">Logistics and Warehousing</h3>
+              <p class="card__text">Mobile robots in distribution centers optimize paths to retrieve items efficiently, coordinating with dozens of other robots to avoid collisions.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2 class="section__title">Experiment with Path Planning</h2>
+          <p>Our interactive demonstration lets you create your own obstacles and watch the A* algorithm find optimal paths in real-time. You can observe how the algorithm explores the search space and compare different scenarios.</p>
+          <a href="interactive.html" class="btn btn--primary">Try Interactive Demo</a>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
