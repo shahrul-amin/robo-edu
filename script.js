@@ -1,3 +1,6 @@
+// ============================================
+// Interactive Grid Demo (for interactive.html)
+// ============================================
 const GRID_SIZE = 20;
 const CELL_SIZE = 30;
 const CANVAS_SIZE = GRID_SIZE * CELL_SIZE;
@@ -24,6 +27,7 @@ let isMouseDown = false;
 
 document.addEventListener('DOMContentLoaded', () => {
   canvas = document.getElementById('grid-canvas');
+  if (!canvas) return; // Not on interactive page
   ctx = canvas.getContext('2d');
   
   initializeGrid();
@@ -113,8 +117,11 @@ function handleMouseUp() {
 
 function handleCanvasClick(e) {
   const rect = canvas.getBoundingClientRect();
-  const x = Math.floor((e.clientX - rect.left) / CELL_SIZE);
-  const y = Math.floor((e.clientY - rect.top) / CELL_SIZE);
+  // Account for CSS scaling - calculate the ratio between actual canvas size and displayed size
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const x = Math.floor((e.clientX - rect.left) * scaleX / CELL_SIZE);
+  const y = Math.floor((e.clientY - rect.top) * scaleY / CELL_SIZE);
   
   if (x < 0 || x >= GRID_SIZE || y < 0 || y >= GRID_SIZE) return;
   

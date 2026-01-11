@@ -7,6 +7,25 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- Page Loader -->
+  <div class="page-loader" id="page-loader">
+    <div class="loader">
+      <div class="loader__spinner"></div>
+      <span class="loader__text">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Mobile Header -->
+  <header class="mobile-header">
+    <span class="mobile-header__logo">Robotics Education</span>
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+      <span class="hamburger__line"></span>
+      <span class="hamburger__line"></span>
+      <span class="hamburger__line"></span>
+    </button>
+  </header>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
   <div class="layout">
     <nav class="sidebar">
       <div class="sidebar__logo">Robotics Education</div>
@@ -43,12 +62,12 @@
               <h3 class="card__title">Shahrul Amin</h3>
             </div>
             <div class="card team-card">
-              <img src="assets/images/image4.jpg" alt="Natalia Romero" class="team-card__image">
-              <h3 class="card__title">Natalia Romero</h3>
+              <img src="assets/images/image4.jpg" alt="Mahian" class="team-card__image">
+              <h3 class="card__title">Mahian</h3>
             </div>
             <div class="card team-card">
-              <img src="assets/images/image5.jpg" alt="Mahian" class="team-card__image">
-              <h3 class="card__title">Mahian</h3>
+              <img src="assets/images/image5.jpg" alt="Natalia Romero" class="team-card__image">
+              <h3 class="card__title">Natalia Romero</h3>
             </div>
           </div>
         </section>
@@ -100,28 +119,6 @@
               <li class="team-list__item">Choset, H., et al. (2005). Principles of Robot Motion: Theory, Algorithms, and Implementations. MIT Press.</li>
             </ul>
           </div>
-
-          <div class="card">
-            <h3 class="card__title">Educational Resources</h3>
-            <ul class="team-list">
-              <li class="team-list__item">Introduction to A* pathfinding algorithm visualization techniques</li>
-              <li class="team-list__item">Robotics education frameworks and best practices for STEM outreach</li>
-              <li class="team-list__item">Age-appropriate science communication strategies</li>
-            </ul>
-          </div>
-        </section>
-
-        <section class="section">
-          <h2 class="section__title">Future Improvements</h2>
-          <p>While this project provides a solid foundation for understanding path planning, we envision several enhancements for future iterations:</p>
-          
-          <ul class="objectives-list">
-            <li class="objectives-list__item">Implement additional algorithms including Dijkstra and RRT for comparison</li>
-            <li class="objectives-list__item">Add dynamic obstacles that move during pathfinding execution</li>
-            <li class="objectives-list__item">Create 3D visualization for aerial drone path planning scenarios</li>
-            <li class="objectives-list__item">Develop assessment tools to measure learning outcomes across audiences</li>
-            <li class="objectives-list__item">Expand content to cover motion planning and trajectory optimization</li>
-          </ul>
         </section>
 
         <section class="section">
@@ -134,5 +131,63 @@
       </div>
     </main>
   </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer__container">
+      <div class="footer__grid">
+        <div class="footer__section">
+          <h4 class="footer__title">Navigation</h4>
+          <a href="index.html" class="footer__link">Home</a>
+          <a href="interactive.html" class="footer__link">Interactive Demo</a>
+          <a href="reflection.html" class="footer__link">Reflection</a>
+        </div>
+        <div class="footer__section">
+          <h4 class="footer__title">Audience Levels</h4>
+          <a href="video1.html" class="footer__link">Junior (Ages 8-12)</a>
+          <a href="video2.html" class="footer__link">High School (Ages 13-18)</a>
+          <a href="video3.html" class="footer__link">Undergraduate</a>
+        </div>
+        <div class="footer__section">
+          <h4 class="footer__title">About</h4>
+          <p class="footer__text">An educational outreach initiative making robotics concepts accessible to learners of all ages.</p>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <p class="footer__copyright">&copy; 2026 Robotics Education. Semester 7 Educational Outreach Initiative.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Page Loader
+    window.addEventListener('load', () => {
+      const loader = document.getElementById('page-loader');
+      setTimeout(() => loader.classList.add('page-loader--hidden'), 300);
+    });
+
+    // Mobile Menu Toggle
+    const hamburger = document.getElementById('hamburger');
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    function toggleMenu() {
+      hamburger.classList.toggle('hamburger--active');
+      sidebar.classList.toggle('sidebar--open');
+      overlay.classList.toggle('sidebar-overlay--active');
+    }
+
+    hamburger.addEventListener('click', toggleMenu);
+    overlay.addEventListener('click', toggleMenu);
+
+    // Close menu on link click
+    document.querySelectorAll('.sidebar__link').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+          toggleMenu();
+        }
+      });
+    });
+  </script>
 </body>
 </html>
