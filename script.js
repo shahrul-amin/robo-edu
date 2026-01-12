@@ -11,42 +11,190 @@ const CELL_START = 2;
 const CELL_GOAL = 3;
 const CELL_PATH = 4;
 const CELL_EXPLORED = 5;
+const CELL_GRASS = 6;
+const CELL_MUD = 7;
+const CELL_WATER = 8;
 
 const MODE_NONE = 0;
 const MODE_SET_START = 1;
 const MODE_SET_GOAL = 2;
 const MODE_TOGGLE_OBSTACLES = 3;
+const MODE_SET_GRASS = 4;
+const MODE_SET_MUD = 5;
+const MODE_SET_WATER = 6;
 
 let canvas;
 let ctx;
 let grid = [];
+let terrainGrid = [];
 let startPos = null;
 let goalPos = null;
 let currentMode = MODE_NONE;
 let isMouseDown = false;
+let currentLevel = 'junior';
+let gridSize = 15;
+let cellSize = 40;
+let terrainEnabled = false;
+let animationSpeed = 5;
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   canvas = document.getElementById('grid-canvas');
-  if (!canvas) return; // Not on interactive page
+  if (!canvas) {
+    console.error('Canvas not found!');
+    return;
+  }
   ctx = canvas.getContext('2d');
+  console.log('Canvas found:', canvas);
+  console.log('Canvas dimensions:', canvas.width, 'x', canvas.height);
+  console.log('Context:', ctx);
+  
+  gridSize = 15;
+  cellSize = 40;
+  canvas.width = gridSize * cellSize;
+  canvas.height = gridSize * cellSize;
   
   initializeGrid();
   renderGrid();
+  setupLevelSelector();
   setupEventListeners();
+  setLevel('junior');
 });
 
+function setupLevelSelector() {
+  const levelButtons = document.querySelectorAll('.level-btn');
+  console.log('Level buttons found:', levelButtons.length);
+  levelButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const level = btn.getAttribute('data-level');
+      console.log('Level button clicked:', level);
+      setLevel(level);
+      levelButtons.forEach(b => b.classList.remove('level-btn--active'));
+      btn.classList.add('level-btn--active');
+    });
+  });
+}
+
+function setLevel(level) {
+  console.log('setLevel called with:', level);
+  currentLevel = level;
+  
+  const algorithmSelect = document.getElementById('algorithm-select');
+  const speedControl = document.getElementById('speed-control');
+  const terrainToggle = document.getElementById('terrain-toggle');
+  const terrainButtons = document.getElementById('terrain-buttons');
+  const challengeButtons = document.getElementById('challenge-buttons');
+  
+  console.log('Elements found:', {
+    algorithmSelect: !!algorithmSelect,
+    speedControl: !!speedControl,
+    terrainToggle: !!terrainToggle,
+    terrainButtons: !!terrainButtons,
+    challengeButtons: !!challengeButtons
+  });
+  
+  if (level === 'junior') {
+    gridSize = 15;
+    cellSize = 40;
+    terrainEnabled = false;
+    if (algorithmSelect) algorithmSelect.style.display = 'none';
+    if (speedControl) speedControl.style.display = 'none';
+    if (terrainToggle) terrainToggle.style.display = 'none';
+    if (terrainButtons) terrainButtons.style.display = 'none';
+    if (challengeButtons) challengeButtons.style.display = 'block';
+    updateInstructions('junior');
+  } else if (level === 'highschool') {
+    gridSize = 20;
+    cellSize = 30;
+    terrainEnabled = false;
+    if (algorithmSelect) algorithmSelect.style.display = 'inline-block';
+    if (speedControl) speedControl.style.display = 'flex';
+    if (terrainToggle) terrainToggle.style.display = 'none';
+    if (terrainButtons) terrainButtons.style.display = 'none';
+    if (challengeButtons) challengeButtons.style.display = 'none';
+    updateInstructions('highschool');
+  } else if (level === 'undergraduate') {
+    gridSize = 30;
+    cellSize = 20;
+    terrainEnabled = false;
+    if (algorithmSelect) algorithmSelect.style.display = 'inline-block';
+    if (speedControl) speedControl.style.display = 'flex';
+    if (terrainToggle) terrainToggle.style.display = 'block';
+    if (challengeButtons) challengeButtons.style.display = 'none';
+    updateInstructions('undergraduate');
+  }
+  
+  console.log('Setting canvas size:', gridSize * cellSize);
+  canvas.width = gridSize * cellSize;
+  canvas.height = gridSize * cellSize;
+  console.log('Canvas resized to:', canvas.width, 'x', canvas.height);
+  initializeGrid();
+  console.log('Grid initialized with size:', gridSize);
+  renderGrid();
+  console.log('Grid initialized and rendered');
+}
+
+function updateInstructions(level) {
+  const instructionCards = document.querySelectorAll('#instructions-section .card');
+  
+  if (instructionCards.length < 4) return;
+  
+  if (level === 'junior') {
+    instructionCards[0].querySelector('.card__title').textContent = '🚀 Place Your Robot';
+    instructionCards[0].querySelector('.card__text').textContent = 'Click the button with the rocket, then click on the grid to put your robot there!';
+    instructionCards[1].querySelector('.card__title').textContent = '🎯 Choose Your Target';
+    instructionCards[1].querySelector('.card__text').textContent = 'Click the target button, then click where you want your robot to go!';
+    instructionCards[2].querySelector('.card__title').textContent = '🧱 Add Walls';
+    instructionCards[2].querySelector('.card__text').textContent = 'Click the wall button, then draw walls by clicking on the grid!';
+    instructionCards[3].querySelector('.card__title').textContent = '✨ Find the Path';
+    instructionCards[3].querySelector('.card__text').textContent = 'Press Find Path and watch your robot find the best way to reach the target!';
+  } else if (level === 'highschool') {
+    instructionCards[0].querySelector('.card__title').textContent = 'Set Start Point';
+    instructionCards[0].querySelector('.card__text').textContent = 'Click the Set Start button, then select a position on the grid for the starting location.';
+    instructionCards[1].querySelector('.card__title').textContent = 'Set Goal Point';
+    instructionCards[1].querySelector('.card__text').textContent = 'Click the Set Goal button, then select the target destination on the grid.';
+    instructionCards[2].querySelector('.card__title').textContent = 'Add Obstacles';
+    instructionCards[2].querySelector('.card__text').textContent = 'Click Toggle Obstacles, then click cells to create barriers. Compare how different algorithms handle obstacles.';
+    instructionCards[3].querySelector('.card__title').textContent = 'Compare Algorithms';
+    instructionCards[3].querySelector('.card__text').textContent = 'Select different algorithms and observe their search patterns, path lengths, and explored cells.';
+  } else {
+    instructionCards[0].querySelector('.card__title').textContent = 'Configure Start & Goal';
+    instructionCards[0].querySelector('.card__text').textContent = 'Set start and goal positions, considering optimal placement for complex scenarios.';
+    instructionCards[1].querySelector('.card__title').textContent = 'Design Environment';
+    instructionCards[1].querySelector('.card__text').textContent = 'Add obstacles and terrain types with varying traversal costs for realistic simulations.';
+    instructionCards[2].querySelector('.card__title').textContent = 'Enable Terrain Costs';
+    instructionCards[2].querySelector('.card__text').textContent = 'Activate weighted terrain to see how algorithms handle non-uniform movement costs.';
+    instructionCards[3].querySelector('.card__title').textContent = 'Analyze Results';
+    instructionCards[3].querySelector('.card__text').textContent = 'Compare path optimality, computational complexity, and algorithm efficiency metrics.';
+  }
+}
+
 function initializeGrid() {
+  console.log('initializeGrid called, gridSize:', gridSize);
   grid = [];
-  for (let y = 0; y < GRID_SIZE; y++) {
+  terrainGrid = [];
+  for (let y = 0; y < gridSize; y++) {
     grid[y] = [];
-    for (let x = 0; x < GRID_SIZE; x++) {
+    terrainGrid[y] = [];
+    for (let x = 0; x < gridSize; x++) {
       grid[y][x] = CELL_EMPTY;
+      terrainGrid[y][x] = CELL_EMPTY;
     }
   }
-  startPos = { x: 2, y: 2 };
-  goalPos = { x: 17, y: 17 };
+  const startX = Math.floor(gridSize * 0.15);
+  const startY = Math.floor(gridSize * 0.15);
+  const goalX = Math.floor(gridSize * 0.85);
+  const goalY = Math.floor(gridSize * 0.85);
+  
+  startPos = { x: startX, y: startY };
+  goalPos = { x: goalX, y: goalY };
   grid[startPos.y][startPos.x] = CELL_START;
   grid[goalPos.y][goalPos.x] = CELL_GOAL;
+  console.log('Grid initialized. Start:', startPos, 'Goal:', goalPos);
+  console.log('Sample grid cells:', grid[0][0], grid[startPos.y][startPos.x], grid[goalPos.y][goalPos.x]);
 }
 
 function setupEventListeners() {
@@ -74,6 +222,105 @@ function setupEventListeners() {
   document.getElementById('btn-clear-path').addEventListener('click', clearPath);
   document.getElementById('btn-clear-grid').addEventListener('click', clearGrid);
   document.getElementById('btn-random-obstacles').addEventListener('click', generateRandomObstacles);
+  
+  const terrainToggle = document.getElementById('btn-toggle-terrain');
+  if (terrainToggle) {
+    terrainToggle.addEventListener('click', toggleTerrain);
+  }
+  
+  const grassBtn = document.getElementById('btn-set-grass');
+  const mudBtn = document.getElementById('btn-set-mud');
+  const waterBtn = document.getElementById('btn-set-water');
+  
+  if (grassBtn) grassBtn.addEventListener('click', () => { currentMode = MODE_SET_GRASS; updateButtonStates(); });
+  if (mudBtn) mudBtn.addEventListener('click', () => { currentMode = MODE_SET_MUD; updateButtonStates(); });
+  if (waterBtn) waterBtn.addEventListener('click', () => { currentMode = MODE_SET_WATER; updateButtonStates(); });
+  
+  const challengeSelect = document.getElementById('challenge-select');
+  if (challengeSelect) {
+    challengeSelect.addEventListener('change', (e) => {
+      const challengeNum = parseInt(e.target.value);
+      if (challengeNum) {
+        loadChallenge(challengeNum);
+      }
+    });
+  }
+  
+  const speedSlider = document.getElementById('speed-slider');
+  if (speedSlider) {
+    speedSlider.addEventListener('input', (e) => {
+      animationSpeed = parseInt(e.target.value);
+    });
+  }
+}
+
+function toggleTerrain() {
+  terrainEnabled = !terrainEnabled;
+  const btn = document.getElementById('btn-toggle-terrain');
+  const terrainButtons = document.getElementById('terrain-buttons');
+  
+  if (terrainEnabled) {
+    btn.textContent = 'Disable Terrain Costs';
+    btn.classList.add('btn--primary');
+    btn.classList.remove('btn--secondary');
+    terrainButtons.style.display = 'block';
+    document.getElementById('legend-grass').style.display = 'flex';
+    document.getElementById('legend-mud').style.display = 'flex';
+    document.getElementById('legend-water').style.display = 'flex';
+  } else {
+    btn.textContent = 'Enable Terrain Costs';
+    btn.classList.remove('btn--primary');
+    btn.classList.add('btn--secondary');
+    terrainButtons.style.display = 'none';
+    document.getElementById('legend-grass').style.display = 'none';
+    document.getElementById('legend-mud').style.display = 'none';
+    document.getElementById('legend-water').style.display = 'none';
+    clearTerrainFromGrid();
+  }
+}
+
+function clearTerrainFromGrid() {
+  for (let y = 0; y < gridSize; y++) {
+    for (let x = 0; x < gridSize; x++) {
+      if (grid[y][x] >= CELL_GRASS) {
+        grid[y][x] = CELL_EMPTY;
+      }
+    }
+  }
+  renderGrid();
+}
+
+function loadChallenge(num) {
+  clearGrid();
+  
+  if (num === 1) {
+    for (let x = 5; x < 10; x++) {
+      if (x !== 7) grid[7][x] = CELL_OBSTACLE;
+    }
+  } else if (num === 2) {
+    for (let y = 3; y < 12; y++) {
+      if (y !== 7) grid[y][7] = CELL_OBSTACLE;
+    }
+    for (let x = 3; x < 10; x++) {
+      if (x !== 7) grid[7][x] = CELL_OBSTACLE;
+    }
+  } else if (num === 3) {
+    for (let i = 0; i < gridSize - 4; i += 2) {
+      for (let j = 2; j < gridSize - 2; j++) {
+        if ((i / 2) % 2 === 0) {
+          if (j < gridSize - 4) grid[j][i + 2] = CELL_OBSTACLE;
+        } else {
+          if (j > 3) grid[j][i + 2] = CELL_OBSTACLE;
+        }
+      }
+    }
+  }
+  
+  // Re-set start and goal positions after loading challenge
+  grid[startPos.y][startPos.x] = CELL_START;
+  grid[goalPos.y][goalPos.x] = CELL_GOAL;
+  
+  renderGrid();
 }
 
 function updateButtonStates() {
@@ -106,7 +353,7 @@ function handleMouseDown(e) {
 }
 
 function handleMouseMove(e) {
-  if (isMouseDown && currentMode === MODE_TOGGLE_OBSTACLES) {
+  if (isMouseDown && (currentMode === MODE_TOGGLE_OBSTACLES || currentMode >= MODE_SET_GRASS)) {
     handleCanvasClick(e);
   }
 }
@@ -117,13 +364,12 @@ function handleMouseUp() {
 
 function handleCanvasClick(e) {
   const rect = canvas.getBoundingClientRect();
-  // Account for CSS scaling - calculate the ratio between actual canvas size and displayed size
   const scaleX = canvas.width / rect.width;
   const scaleY = canvas.height / rect.height;
-  const x = Math.floor((e.clientX - rect.left) * scaleX / CELL_SIZE);
-  const y = Math.floor((e.clientY - rect.top) * scaleY / CELL_SIZE);
+  const x = Math.floor((e.clientX - rect.left) * scaleX / cellSize);
+  const y = Math.floor((e.clientY - rect.top) * scaleY / cellSize);
   
-  if (x < 0 || x >= GRID_SIZE || y < 0 || y >= GRID_SIZE) return;
+  if (x < 0 || x >= gridSize || y < 0 || y >= gridSize) return;
   
   if (currentMode === MODE_SET_START) {
     if (grid[y][x] !== CELL_GOAL) {
@@ -148,50 +394,116 @@ function handleCanvasClick(e) {
       renderGrid();
     }
   } else if (currentMode === MODE_TOGGLE_OBSTACLES) {
-    if (grid[y][x] === CELL_OBSTACLE) {
-      grid[y][x] = CELL_EMPTY;
-    } else if (grid[y][x] === CELL_EMPTY) {
-      grid[y][x] = CELL_OBSTACLE;
+    if (grid[y][x] !== CELL_START && grid[y][x] !== CELL_GOAL) {
+      grid[y][x] = grid[y][x] === CELL_OBSTACLE ? CELL_EMPTY : CELL_OBSTACLE;
+      renderGrid();
     }
-    renderGrid();
+  } else if (currentMode === MODE_SET_GRASS) {
+    if (grid[y][x] !== CELL_START && grid[y][x] !== CELL_GOAL && grid[y][x] !== CELL_OBSTACLE) {
+      terrainGrid[y][x] = CELL_GRASS;
+      if (grid[y][x] === CELL_EMPTY) {
+        grid[y][x] = CELL_GRASS;
+      }
+      renderGrid();
+    }
+  } else if (currentMode === MODE_SET_MUD) {
+    if (grid[y][x] !== CELL_START && grid[y][x] !== CELL_GOAL && grid[y][x] !== CELL_OBSTACLE) {
+      terrainGrid[y][x] = CELL_MUD;
+      if (grid[y][x] === CELL_EMPTY) {
+        grid[y][x] = CELL_MUD;
+      }
+      renderGrid();
+    }
+  } else if (currentMode === MODE_SET_WATER) {
+    if (grid[y][x] !== CELL_START && grid[y][x] !== CELL_GOAL && grid[y][x] !== CELL_OBSTACLE) {
+      terrainGrid[y][x] = CELL_WATER;
+      if (grid[y][x] === CELL_EMPTY) {
+        grid[y][x] = CELL_WATER;
+      }
+      renderGrid();
+    }
   }
 }
 
 function renderGrid() {
-  ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+  console.log('renderGrid called. Canvas:', canvas.width, 'x', canvas.height, 'GridSize:', gridSize, 'CellSize:', cellSize);
   
-  for (let y = 0; y < GRID_SIZE; y++) {
-    for (let x = 0; x < GRID_SIZE; x++) {
+  ctx.fillStyle = '#1a2332';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  console.log('Background filled');
+  
+  let cellsDrawn = 0;
+  let startDrawn = false;
+  let goalDrawn = false;
+  
+  for (let y = 0; y < gridSize; y++) {
+    for (let x = 0; x < gridSize; x++) {
       const cellType = grid[y][x];
+      const terrainType = terrainGrid && terrainGrid[y] ? terrainGrid[y][x] : CELL_EMPTY;
+      cellsDrawn++;
       
-      if (cellType === CELL_EMPTY) {
-        ctx.fillStyle = '#FFFFFF';
-      } else if (cellType === CELL_OBSTACLE) {
-        ctx.fillStyle = '#37352F';
-      } else if (cellType === CELL_START) {
-        ctx.fillStyle = '#0F7B6C';
-      } else if (cellType === CELL_GOAL) {
-        ctx.fillStyle = '#D44C47';
-      } else if (cellType === CELL_PATH) {
-        ctx.fillStyle = '#2383E2';
-      } else if (cellType === CELL_EXPLORED) {
-        ctx.fillStyle = '#E8F3FF';
+      // Draw base terrain first
+      if (terrainType === CELL_GRASS) {
+        ctx.fillStyle = '#90EE90';
+        ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+      } else if (terrainType === CELL_MUD) {
+        ctx.fillStyle = '#8B7355';
+        ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+      } else if (terrainType === CELL_WATER) {
+        ctx.fillStyle = '#4682B4';
+        ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+      } else {
+        ctx.fillStyle = '#0f1419';
+        ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
       }
       
-      ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+      // Then draw overlay (path, explored, obstacles, start, goal)
+      if (cellType === CELL_OBSTACLE) {
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+      } else if (cellType === CELL_START) {
+        ctx.fillStyle = '#10b981';
+        ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+        startDrawn = true;
+        console.log('Drawing START at', x, y);
+      } else if (cellType === CELL_GOAL) {
+        ctx.fillStyle = '#ef4444';
+        ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+        goalDrawn = true;
+        console.log('Drawing GOAL at', x, y);
+      } else if (cellType === CELL_PATH) {
+        ctx.fillStyle = 'rgba(59, 130, 246, 0.8)';
+        ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+      } else if (cellType === CELL_EXPLORED) {
+        ctx.fillStyle = 'rgba(59, 130, 246, 0.25)';
+        ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+      }
       
-      ctx.strokeStyle = '#E0E0E0';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+      ctx.strokeStyle = 'rgba(59, 130, 246, 0.15)';
+      ctx.lineWidth = 0.5;
+      ctx.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
     }
+  }
+  
+  console.log('Grid rendered. Cells drawn:', cellsDrawn, 'Start drawn:', startDrawn, 'Goal drawn:', goalDrawn);
+}
+
+function getCellCost(cellType) {
+  if (!terrainEnabled) return 1;
+  
+  switch(cellType) {
+    case CELL_GRASS: return 1.5;
+    case CELL_MUD: return 2.5;
+    case CELL_WATER: return 4.0;
+    default: return 1.0;
   }
 }
 
 function clearPath() {
-  for (let y = 0; y < GRID_SIZE; y++) {
-    for (let x = 0; x < GRID_SIZE; x++) {
+  for (let y = 0; y < gridSize; y++) {
+    for (let x = 0; x < gridSize; x++) {
       if (grid[y][x] === CELL_PATH || grid[y][x] === CELL_EXPLORED) {
-        grid[y][x] = CELL_EMPTY;
+        grid[y][x] = terrainGrid[y][x];
       }
     }
   }
@@ -200,8 +512,8 @@ function clearPath() {
 }
 
 function clearGrid() {
-  for (let y = 0; y < GRID_SIZE; y++) {
-    for (let x = 0; x < GRID_SIZE; x++) {
+  for (let y = 0; y < gridSize; y++) {
+    for (let x = 0; x < gridSize; x++) {
       grid[y][x] = CELL_EMPTY;
     }
   }
@@ -217,12 +529,12 @@ function clearGrid() {
 
 function generateRandomObstacles() {
   clearGrid();
-  const obstacleCount = Math.floor(GRID_SIZE * GRID_SIZE * 0.25);
+  const obstacleCount = Math.floor(gridSize * gridSize * 0.25);
   let placed = 0;
   
   while (placed < obstacleCount) {
-    const x = Math.floor(Math.random() * GRID_SIZE);
-    const y = Math.floor(Math.random() * GRID_SIZE);
+    const x = Math.floor(Math.random() * gridSize);
+    const y = Math.floor(Math.random() * gridSize);
     
     if (grid[y][x] === CELL_EMPTY) {
       grid[y][x] = CELL_OBSTACLE;
@@ -233,7 +545,7 @@ function generateRandomObstacles() {
   renderGrid();
 }
 
-function findPath() {
+async function findPath() {
   if (!startPos || !goalPos) {
     showPathInfo('Please set both start and goal positions');
     return;
@@ -247,23 +559,30 @@ function findPath() {
   let result;
   
   if (selectedAlgorithm === 'astar') {
-    result = astar(startPos, goalPos);
+    result = await astar(startPos, goalPos);
   } else if (selectedAlgorithm === 'dijkstra') {
-    result = dijkstra(startPos, goalPos);
+    result = await dijkstra(startPos, goalPos);
   } else if (selectedAlgorithm === 'bfs') {
-    result = bfs(startPos, goalPos);
+    result = await bfs(startPos, goalPos);
   } else if (selectedAlgorithm === 'dfs') {
-    result = dfs(startPos, goalPos);
+    result = await dfs(startPos, goalPos);
   }
   
-  if (result.path.length > 0) {
-    showPathInfo(`Path found! Length: ${result.path.length} steps, Explored: ${result.explored} cells`);
+  if (result && result.path && result.path.length > 0) {
+    let message = `Path found! Length: ${result.path.length} steps`;
+    if (currentLevel !== 'junior') {
+      message += `, Explored: ${result.explored} cells`;
+    }
+    if (terrainEnabled && result.cost) {
+      message += `, Total Cost: ${result.cost.toFixed(1)}`;
+    }
+    showPathInfo(message);
   } else {
-    showPathInfo('No path found. The goal is unreachable.');
+    showPathInfo(currentLevel === 'junior' ? 'No path found! Try removing some walls.' : 'No path found. The goal is unreachable.');
   }
 }
 
-function astar(start, goal) {
+async function astar(start, goal) {
   const openSet = [];
   const closedSet = new Set();
   const cameFrom = new Map();
@@ -290,9 +609,11 @@ function astar(start, goal) {
     const currentKey = `${current.x},${current.y}`;
     
     if (currentKey === goalKey) {
+      const pathResult = reconstructPath(cameFrom, current, gScore);
       return {
-        path: reconstructPath(cameFrom, current),
-        explored: exploredCount
+        path: pathResult.path,
+        explored: exploredCount,
+        cost: pathResult.cost
       };
     }
     
@@ -310,7 +631,8 @@ function astar(start, goal) {
       
       if (closedSet.has(neighborKey)) continue;
       
-      const tentativeGScore = gScore.get(currentKey) + 1;
+      const moveCost = getCellCost(terrainGrid[neighbor.y][neighbor.x]);
+      const tentativeGScore = gScore.get(currentKey) + moveCost;
       
       const neighborInOpen = openSet.some(n => `${n.x},${n.y}` === neighborKey);
       
@@ -326,27 +648,32 @@ function astar(start, goal) {
     }
     
     renderGrid();
+    await sleep(100 / animationSpeed);
   }
   
   renderGrid();
-  return { path: [], explored: exploredCount };
+  return { path: [], explored: exploredCount, cost: 0 };
 }
 
-function reconstructPath(cameFrom, current) {
+function reconstructPath(cameFrom, current, gScore = null) {
   const path = [];
   let currentKey = `${current.x},${current.y}`;
+  let totalCost = gScore ? gScore.get(currentKey) : 0;
+  
+  // Add the goal position to the path
+  path.push(current);
   
   while (cameFrom.has(currentKey)) {
     const pos = cameFrom.get(currentKey);
-    if (grid[pos.y][pos.x] !== CELL_START) {
+    path.push(pos);
+    if (grid[pos.y][pos.x] !== CELL_START && grid[pos.y][pos.x] !== CELL_GOAL) {
       grid[pos.y][pos.x] = CELL_PATH;
-      path.push(pos);
     }
     currentKey = `${pos.x},${pos.y}`;
   }
   
   renderGrid();
-  return path;
+  return { path, cost: totalCost };
 }
 
 function getNeighbors(pos) {
@@ -362,7 +689,7 @@ function getNeighbors(pos) {
     const newX = pos.x + dir.x;
     const newY = pos.y + dir.y;
     
-    if (newX >= 0 && newX < GRID_SIZE && newY >= 0 && newY < GRID_SIZE) {
+    if (newX >= 0 && newX < gridSize && newY >= 0 && newY < gridSize) {
       if (grid[newY][newX] !== CELL_OBSTACLE) {
         neighbors.push({ x: newX, y: newY });
       }
@@ -388,7 +715,7 @@ function hidePathInfo() {
   infoBox.style.display = 'none';
 }
 
-function dijkstra(start, goal) {
+async function dijkstra(start, goal) {
   const openSet = [];
   const closedSet = new Set();
   const cameFrom = new Map();
@@ -413,9 +740,11 @@ function dijkstra(start, goal) {
     const currentKey = `${current.x},${current.y}`;
     
     if (currentKey === goalKey) {
+      const pathResult = reconstructPath(cameFrom, current, distance);
       return {
-        path: reconstructPath(cameFrom, current),
-        explored: exploredCount
+        path: pathResult.path,
+        explored: exploredCount,
+        cost: pathResult.cost
       };
     }
     
@@ -433,7 +762,8 @@ function dijkstra(start, goal) {
       
       if (closedSet.has(neighborKey)) continue;
       
-      const tentativeDistance = distance.get(currentKey) + 1;
+      const moveCost = getCellCost(terrainGrid[neighbor.y][neighbor.x]);
+      const tentativeDistance = distance.get(currentKey) + moveCost;
       
       const neighborInOpen = openSet.some(n => `${n.x},${n.y}` === neighborKey);
       
@@ -450,13 +780,14 @@ function dijkstra(start, goal) {
     }
     
     renderGrid();
+    await sleep(100 / animationSpeed);
   }
   
   renderGrid();
-  return { path: [], explored: exploredCount };
+  return { path: [], explored: exploredCount, cost: 0 };
 }
 
-function bfs(start, goal) {
+async function bfs(start, goal) {
   const queue = [start];
   const visited = new Set();
   const cameFrom = new Map();
@@ -473,8 +804,9 @@ function bfs(start, goal) {
     const currentKey = `${current.x},${current.y}`;
     
     if (currentKey === goalKey) {
+      const pathResult = reconstructPath(cameFrom, current);
       return {
-        path: reconstructPath(cameFrom, current),
+        path: pathResult.path,
         explored: exploredCount
       };
     }
@@ -497,13 +829,14 @@ function bfs(start, goal) {
     }
     
     renderGrid();
+    await sleep(100 / animationSpeed);
   }
   
   renderGrid();
   return { path: [], explored: exploredCount };
 }
 
-function dfs(start, goal) {
+async function dfs(start, goal) {
   const stack = [start];
   const visited = new Set();
   const cameFrom = new Map();
@@ -520,8 +853,9 @@ function dfs(start, goal) {
     const currentKey = `${current.x},${current.y}`;
     
     if (currentKey === goalKey) {
+      const pathResult = reconstructPath(cameFrom, current);
       return {
-        path: reconstructPath(cameFrom, current),
+        path: pathResult.path,
         explored: exploredCount
       };
     }
@@ -544,6 +878,7 @@ function dfs(start, goal) {
     }
     
     renderGrid();
+    await sleep(100 / animationSpeed);
   }
   
   renderGrid();
